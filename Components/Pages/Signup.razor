@@ -1,0 +1,102 @@
+﻿@page "/signup"
+@using MudBlazor
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@using System.Text.Json
+
+<MudPaper Class="d-flex justify-center align-center" Style="min-height: 100vh; background-color: #f9f9f9;">
+    <MudContainer MaxWidth="MaxWidth.Small">
+        <MudCard>
+            <MudCardContent>
+                <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
+                    Sign Up
+                </MudText>
+                <EditForm Model="@newUser" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <!-- Email Field -->
+                    <MudTextField @bind-Value="newUser.Email" Label="Email" Placeholder="Enter your email" Required="true" Variant="Variant.Filled" FullWidth="true" />
+
+                    <!-- Username Field -->
+                    <MudTextField @bind-Value="newUser.Username" Label="Username" Placeholder="Enter your username" Required="true" Variant="Variant.Filled" FullWidth="true" />
+
+                    <!-- Password Field -->
+                    <MudTextField @bind-Value="newUser.Password" Label="Password" Placeholder="Choose a strong password" InputType="InputType.Password" Required="true" Variant="Variant.Filled" FullWidth="true" />
+
+                    <!-- Confirm Password Field -->
+                    <MudTextField @bind-Value="confirmPassword" Label="Confirm Password" Placeholder="Retype your password" InputType="InputType.Password" Required="true" Variant="Variant.Filled" FullWidth="true" />
+
+                    <!-- Currency Dropdown -->
+                    <MudSelect T="string" @bind-Value="newUser.Currency" Label="Currency" Required="true" Variant="Variant.Filled" FullWidth="true">
+                        <MudSelectItem Value="USD">USD</MudSelectItem>
+                        <MudSelectItem Value="NPR">Nrs</MudSelectItem>
+                    </MudSelect>
+
+                    <!-- Agree to Terms Checkbox -->
+                    <MudCheckBox @bind-Checked="isAgreed" Color="Color.Primary" Label="I agree" Required="true" Class="mt-2" />
+
+                    <!-- Register Button -->
+                    <MudButton FullWidth="true" Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Disabled="@(!isAgreed)" Class="mt-4">
+                        Register
+                    </MudButton>
+
+                    <!-- Error Message -->
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mt-3">
+                            @errorMessage
+                        </MudAlert>
+                    }
+
+                    <!-- Success Message -->
+                    @if (isRegistrationSuccessful)
+                    {
+                        <MudAlert Severity="Severity.Success" Variant="Variant.Filled" Class="mt-3">
+                            Registration Successful! Redirecting to login page...
+                        </MudAlert>
+                    }
+                </EditForm>
+            </MudCardContent>
+        </MudCard>
+        <MudText Align="Align.Center" Class="mt-3">
+            Already have an account? <MudLink Href="/login" Color="Color.Primary">Login here</MudLink>
+        </MudText>
+    </MudContainer>
+</MudPaper>
+
+@code {
+    private User newUser = new User(string.Empty, string.Empty, string.Empty);
+    private string confirmPassword;
+    private string errorMessage;
+    private bool isRegistrationSuccessful = false;
+    private bool isAgreed = false;
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (newUser.Password != confirmPassword)
+            {
+                errorMessage = "Passwords do not match!";
+                return;
+            }
+
+            var existingUser = await UserService.GetUserAsync(newUser.Username);
+            if (existingUser != null)
+            {
+                errorMessage = "Username already exists!";
+                return;
+            }
+
+            await UserService.RegisterUser(newUser);
+            isRegistrationSuccessful = true;
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+}

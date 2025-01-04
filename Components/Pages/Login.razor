@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/Login"
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
 
@@ -15,7 +15,7 @@
                               RequiredError="Password is required!" />
                 <MudTextField T="string"
                               Label="Password" HelperText="Repeat the password" InputType="InputType.Password"
-                              Validation="@(new Func<string, string>(PasswordMatch))" />
+                              Validation= "@(new Func<string, string>(PasswordMatch))" />
                 <div class="d-flex">
                     <MudRadioGroup T="string" Required="true" RequiredError="Account type is required!">
                         <MudRadio Value="@("Personal")">Personal</MudRadio>
