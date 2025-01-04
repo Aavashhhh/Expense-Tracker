@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using MudBlazor.Services;
 
 namespace MauiApp3
 {
@@ -18,7 +19,11 @@ namespace MauiApp3
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+
+            builder.Services.AddMudServices();
+
+
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
